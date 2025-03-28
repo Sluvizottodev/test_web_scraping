@@ -1,4 +1,4 @@
-package main.java.service;
+package service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,12 +16,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Document; 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import main.java.model.Anexo;
-import main.java.model.ScrapingResult;
+import model.Anexo;
+import model.ScrapingResult;
 
 public class ScrapingService {
     private static final String TARGET_URL = "https://www.gov.br/ans/pt-br/acesso-a-informacao/participacao-da-sociedade/atualizacao-do-rol-de-procedimentos";
@@ -32,35 +32,41 @@ public class ScrapingService {
     private final FileService fileService;
     private final ExecutorService executor;
 
-    public ScrapingService(){
+    public ScrapingService() {
         this.fileService = new FileService();
         this.executor = Executors.newFixedThreadPool(4); 
     }
 
-    public ScrapingResult executeFullProcess(){
+    public ScrapingResult executeFullProcess() {
         long startTime = System.currentTimeMillis();
         try {
-            //1.
+            // 1. 
             fileService.createDirectoryIfNotExists(DOWNLOAD_DIR);
-            //2.
+            
+            // 2. 
             List<Anexo> attachments = findAttachmentsOnWebsite();
             downloadAttachments(attachments);
-            //3.
+            
+            // 3. 
             String fullZipPath = Paths.get(DOWNLOAD_DIR, ZIP_FILE).toString();
             fileService.zipAttachments(attachments, fullZipPath);
-            //4.
+            
+            // 4. 
             long executionTime = System.currentTimeMillis() - startTime;
-            return new ScrapingResult(true, "Process Completed sucessfully", attachments, fullZipPath, executionTime);
+            return new ScrapingResult(true, "Process completed successfully", 
+                                    attachments, fullZipPath, executionTime);
         } catch (Exception e) {
-            //5.
-            return new ScrapingResult(false, "Error during process " + e.getMessage());
+            // 5. Retornar erro
+            return new ScrapingResult(false, "Error during process: " + e.getMessage());
         } finally {
             executor.shutdown();
         }
     }
 
     private List<Anexo> findAttachmentsOnWebsite() throws IOException {
-        Document document = JsoupTest.connect(TARGET_URL).get();
+        Document document = Jsoup.connect(TARGET_URL)
+                               .timeout(DOWNLOAD_TIMEOUT_SECONDS * 1000)
+                               .get();
         Elements pdfLinks = document.select("a[href$=.pdf]");
         
         List<Anexo> attachments = new ArrayList<>();
@@ -89,19 +95,26 @@ public class ScrapingService {
         return linkText + ".pdf";
     }
 
-    private void downloadAttachments(List<Anexo> attachments) throws InterruptedException, ExecutionException, TimeoutException {
+    private void downloadAttachments(List<Anexo> attachments) 
+            throws InterruptedException, ExecutionException, TimeoutException {
         List<Future<?>> futures = new ArrayList<>();
         
         for (Anexo attachment : attachments) {
-            futures.add(executor.submit(() -> {
-                String filePath = Paths.get(DOWNLOAD_DIR, attachment.getName()).toString();
-                downloadFile(attachment.getUrl(), filePath);
-                attachment.setPath(filePath);
-            }));
+            futures.add(executor.submit(() -> downloadAndSetPath(attachment)));
         }
         
         for (Future<?> future : futures) {
             future.get(DOWNLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }
+    }
+
+    private void downloadAndSetPath(Anexo attachment) {
+        try {
+            String filePath = Paths.get(DOWNLOAD_DIR, attachment.getName()).toString();
+            downloadFile(attachment.getUrl(), filePath);
+            attachment.setPath(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to download file: " + attachment.getUrl(), e);
         }
     }
 
@@ -111,5 +124,9 @@ public class ScrapingService {
              FileOutputStream fos = new FileOutputStream(destination)) {
             fos.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
         }
+    }
+
+    public FileService getFileService() {
+        return fileService;
     }
 }

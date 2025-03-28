@@ -1,8 +1,6 @@
-package main.java.controller;
-
-import main.java.model.ScrapingResult;
-import main.java.service.ScrapingService;
-
+package controller;
+import model.ScrapingResult;
+import service.ScrapingService;
 public class ScrapingController {
     private final ScrapingService scrapingService;
 
@@ -22,7 +20,7 @@ public class ScrapingController {
         
         if(result.isSucess()) {
             System.out.println("\nDetalhes:");
-            System.out.println("- Arquivos baixados: " + result.getDowloaddedCount());
+            System.out.println("- Arquivos baixados: " + result.getDowloadedCount());
             System.out.println("- Caminho do ZIP: " + result.getPathZip());
             System.out.println("- Tempo de execução: " + result.getExecutionTime() + "ms");
             

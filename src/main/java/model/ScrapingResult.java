@@ -1,4 +1,4 @@
-package main.java.model;
+package model;
 
 import java.util.List;
 import java.util.Objects;
@@ -62,12 +62,12 @@ public class ScrapingResult {
         this.pathZip = pathZip;
     }
 
-    public void setExecutionTime(){
+    public void setExecutionTime(long executionTime){
         this.executionTime = executionTime;
     }
 
     //Métodos
-    public int getDowloaddedCount(){
+    public int getDowloadedCount(){
         return downAttachments.size();
     }
 

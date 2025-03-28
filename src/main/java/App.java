@@ -1,7 +1,8 @@
-package main.java;
+// Package: src/main/java
 
-import main.java.controller.ScrapingController;
-import main.java.model.ScrapingResult;
+import controller.ScrapingController;
+import model.ScrapingResult;
+
 
 public class App {
     public static void main(String[] args) {

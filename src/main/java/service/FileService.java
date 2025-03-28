@@ -1,4 +1,4 @@
-package main.java.service;
+package service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,8 +8,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.util.List;
 
-
-import main.java.model.Anexo;
+import model.Anexo;
 
 public class FileService {
     private static final int BUFFER_SIZE = 1024;
