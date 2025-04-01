@@ -12,12 +12,7 @@ Aplicação Java que realiza web scraping no site da ANS para baixar os Anexos I
    - Anexo I (Rol de Procedimentos)
    - Anexo II (Diretrizes de Utilização)
 
-3. **Compactação inteligente** em ZIP
-
-4. **Tratamento de erros**:
-   - Timeout de conexão
-   - Links quebrados
-   - Verificação de integridade
+3. **Compactação** em ZIP
 
 ## 🚀 Como Executar
 ### Pré-requisitos
